@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import Any, Iterable, List, Tuple
+from typing import Any, Iterable, List, Tuple, Set
+from collections import defaultdict
 
 from typing_extensions import Protocol
 
@@ -22,8 +23,10 @@ def central_difference(f: Any, *vals: Any, arg: int = 0, epsilon: float = 1e-6) 
     Returns:
         An approximation of $f'_i(x_0, \ldots, x_{n-1})$
     """
-    # TODO: Implement for Task 1.1.
-    raise NotImplementedError('Need to implement for Task 1.1')
+    x = vals[arg]
+    vals_eps = list(vals)
+    vals_eps[arg] = x + epsilon
+    return (f(*vals_eps) - f(*vals)) / epsilon
 
 
 variable_count = 1
@@ -61,8 +64,22 @@ def topological_sort(variable: Variable) -> Iterable[Variable]:
     Returns:
         Non-constant Variables in topological order starting from the right.
     """
-    # TODO: Implement for Task 1.4.
-    raise NotImplementedError('Need to implement for Task 1.4')
+    order_list = []
+    visited = set()
+    dfs(variable, order_list, visited)
+    order_list.reverse()
+    return order_list
+
+def dfs(variable: Variable, order_list: List[Variable], visited: Set[int]) -> None:
+    if variable.is_constant(): return
+    visited.add(variable.unique_id)
+
+    for v in variable.parents:
+        if v.unique_id not in visited:
+            dfs(v, order_list, visited)
+
+    order_list.append(variable)
+
 
 
 def backpropagate(variable: Variable, deriv: Any) -> None:
@@ -76,8 +93,18 @@ def backpropagate(variable: Variable, deriv: Any) -> None:
 
     No return. Should write to its results to the derivative values of each leaf through `accumulate_derivative`.
     """
-    # TODO: Implement for Task 1.4.
-    raise NotImplementedError('Need to implement for Task 1.4')
+    order = topological_sort(variable)
+    derivatives =defaultdict(int)
+    derivatives[variable.unique_id] = deriv
+
+    for var in order:
+        current_der = derivatives[var.unique_id]
+
+        if var.is_leaf():
+            var.accumulate_derivative(current_der)
+        else:
+            for parent, parent_der in var.chain_rule(current_der):
+                derivatives[parent.unique_id] += parent_der
 
 
 @dataclass
