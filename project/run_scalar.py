@@ -3,6 +3,7 @@ Be sure you have minitorch installed in you Virtual Env.
 >>> pip install -Ue .
 """
 import random
+random.seed(17)
 
 import minitorch
 
@@ -110,7 +111,7 @@ class ScalarTrain:
 
 if __name__ == "__main__":
     PTS = 50
-    HIDDEN = 2
+    HIDDEN = 10
     RATE = 0.5
-    data = minitorch.datasets["Simple"](PTS)
-    ScalarTrain(HIDDEN).train(data, RATE)
+    data = minitorch.datasets["Xor"](PTS)
+    ScalarTrain(HIDDEN).train(data, RATE, max_epochs=400)
