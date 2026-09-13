@@ -264,17 +264,24 @@ def tensor_map(
         in_shape: Shape,
         in_strides: Strides,
     ) -> None:
-        # TODO: Implement for Task 2.3.
-        raise NotImplementedError('Need to implement for Task 2.3')
+        for ordinal in range(len(out)):
+            out_index = np.zeros(len(out_shape)).astype(int)
+            to_index(ordinal, out_shape, out_index)
+
+            in_index = np.zeros(len(in_shape)).astype(int)
+            broadcast_index(out_index, out_shape, in_shape, in_index)
+
+            pos_in = index_to_position(in_index, in_strides)
+            pos_out = index_to_position(out_index, out_strides)
+
+            out[pos_out] = fn(in_storage[pos_in])
 
     return _map
 
 
 def tensor_zip(
     fn: Callable[[float, float], float]
-) -> Callable[
-    [Storage, Shape, Strides, Storage, Shape, Strides, Storage, Shape, Strides], None
-]:
+) -> Callable[[Storage, Shape, Strides, Storage, Shape, Strides, Storage, Shape, Strides], None]:
     """
     Low-level implementation of tensor zip between
     tensors with *possibly different strides*.
@@ -309,8 +316,20 @@ def tensor_zip(
         b_shape: Shape,
         b_strides: Strides,
     ) -> None:
-        # TODO: Implement for Task 2.3.
-        raise NotImplementedError('Need to implement for Task 2.3')
+        for ordinal in range(len(out)):
+            out_index = np.zeros(len(out_shape)).astype(int)
+            to_index(ordinal, out_shape, out_index)
+
+            a_index = np.zeros(len(a_shape)).astype(int)
+            broadcast_index(out_index, out_shape, a_shape, a_index)
+            b_index = np.zeros(len(b_shape)).astype(int)
+            broadcast_index(out_index, out_shape, b_shape, b_index)
+
+            pos_a = index_to_position(a_index, a_strides)
+            pos_b = index_to_position(b_index, b_strides)
+            pos_out = index_to_position(out_index, out_strides)
+
+            out[pos_out] = fn(a_storage[pos_a], b_storage[pos_b])
 
     return _zip
 
@@ -340,8 +359,20 @@ def tensor_reduce(
         a_strides: Strides,
         reduce_dim: int,
     ) -> None:
-        # TODO: Implement for Task 2.3.
-        raise NotImplementedError('Need to implement for Task 2.3')
+        a_size = 1
+        for s in a_shape: a_size *= s
+
+        for ordinal in range(a_size):
+            a_index = np.zeros(len(a_shape)).astype(int)
+            to_index(ordinal, a_shape, a_index)
+
+            out_index = np.zeros(len(out_shape)).astype(int)
+            broadcast_index(a_index, a_shape, out_shape, out_index)
+
+            pos_a = index_to_position(a_index, a_strides)
+            pos_out = index_to_position(out_index, out_strides)
+
+            out[pos_out] = fn(out[pos_out], a_storage[pos_a])
 
     return _reduce
 

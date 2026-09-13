@@ -94,7 +94,7 @@ def backpropagate(variable: Variable, deriv: Any) -> None:
     No return. Should write to its results to the derivative values of each leaf through `accumulate_derivative`.
     """
     order = topological_sort(variable)
-    derivatives =defaultdict(int)
+    derivatives = defaultdict(int)
     derivatives[variable.unique_id] = deriv
 
     for var in order:
